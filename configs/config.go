@@ -17,7 +17,7 @@ func GetAppConfig() AppConfig {
 
 	appConfig.Port = os.Getenv("PORT")
 	appConfig.OrderUrl = os.Getenv("ORDER_URL")
-	orderTimeout := os.Getenv("ORDER_TIMEOUT_MS")
+	orderTimeout := os.Getenv("ORDER_TIMEOUT")
 	orderTimeoutTime, err := time.ParseDuration(orderTimeout)
 	if err != nil {
 		panic(err)

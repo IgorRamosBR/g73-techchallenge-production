@@ -2,6 +2,11 @@ package order
 
 import "time"
 
+type OrderPage struct {
+	Results []Order `json:"results"`
+	Next    *int    `json:"next"`
+}
+
 type Order struct {
 	ID     int    `json:"id"`
 	Status string `json:"status"`

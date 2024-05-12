@@ -6,7 +6,7 @@ import (
 )
 
 type OrderUseCase interface {
-	GetOrders() ([]models.ProductionOrder, error)
+	GetOrders() (models.ProductionOrderPage, error)
 	UpdateOrderStatus(orderId string, status string) error
 }
 
@@ -20,10 +20,10 @@ func NewOrderUseCase(orderClient gateways.OrderClient) OrderUseCase {
 	}
 }
 
-func (o orderUseCase) GetOrders() ([]models.ProductionOrder, error) {
+func (o orderUseCase) GetOrders() (models.ProductionOrderPage, error) {
 	orders, err := o.orderClient.GetOrders()
 	if err != nil {
-		return nil, err
+		return models.ProductionOrderPage{}, err
 	}
 
 	return orders, nil

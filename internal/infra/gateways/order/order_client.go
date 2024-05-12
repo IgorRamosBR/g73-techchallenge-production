@@ -12,7 +12,7 @@ import (
 )
 
 type OrderClient interface {
-	GetOrders() ([]models.ProductionOrder, error)
+	GetOrders() (models.ProductionOrderPage, error)
 	UpdateOrderStatus(orderId string, status string) error
 }
 
@@ -28,27 +28,32 @@ func NewOrderClient(httpClient http.HttpClient, orderUrl string) OrderClient {
 	}
 }
 
-func (c *orderClient) GetOrders() ([]models.ProductionOrder, error) {
+func (c *orderClient) GetOrders() (models.ProductionOrderPage, error) {
 	resp, err := c.httpClient.DoGet(c.orderUrl)
 	if err != nil {
-		return nil, err
+		return models.ProductionOrderPage{}, err
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, errors.New("resp status code non-2xx")
+		return models.ProductionOrderPage{}, errors.New("resp status code non-2xx")
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return models.ProductionOrderPage{}, err
 	}
 
-	var orders []Order
-	if err := json.Unmarshal(body, &orders); err != nil {
-		return nil, err
+	var ordersPage OrderPage
+	if err := json.Unmarshal(body, &ordersPage); err != nil {
+		return models.ProductionOrderPage{}, err
 	}
 
-	return c.mapOrdersToProductionOrders(orders), nil
+	productionOrders := c.mapOrdersToProductionOrders(ordersPage.Results)
+
+	return models.ProductionOrderPage{
+		Results: productionOrders,
+		Next:    new(int),
+	}, nil
 }
 
 func (c *orderClient) UpdateOrderStatus(orderId string, status string) error {
