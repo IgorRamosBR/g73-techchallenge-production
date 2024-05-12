@@ -19,5 +19,5 @@ func main() {
 	orderController := controllers.NewOrderController(orderUseCase)
 
 	api := api.NewApi(orderController)
-	api.Run(":8080")
+	api.Run(":" + appConfig.Port)
 }
