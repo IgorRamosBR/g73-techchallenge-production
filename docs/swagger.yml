@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  title: API de acompanhamento de pedidos em Produção -  g73-techchallenge-production
+  description: |- 
+    Este microsserviço que oferece funcionalidades relacionadas à gestão de pedidos de produção. Ele foi desenvolvido para facilitar a comunicação entre os clientes e o sistema de gestão de pedidos.
+
+    **Funcionalidades Principais:**
+
+    - **Recuperação de Pedidos:** O microsserviço permite aos clientes recuperar uma lista de todos os pedidos de produção registrados no sistema.
+
+    - **Atualização de Status de Pedido:** Os clientes podem atualizar o status de um pedido específico no sistema, indicando se está em processo de fabricação, concluído, ou qualquer outro status relevante.
+    
+    links úteis:
+    - [Repositório do Projeto ](https://github.com/IgorRamosBR/g73-techchallenge-production)
+  version: 1.0.11
+servers:
+  - url: http://localhost:8082/v1/
+tags:
+  - name: production
+    description: Pagamento sobre as ordens de pedido
+
+
+paths:
+  /orders:
+    get:
+      tags:
+        - production
+      summary: Buscar pedidos em produção
+      description: Buscar pedidos em produção
+      operationId: getOrders
+      parameters:
+      - in: query
+        name: limit
+        description: número de resultados por página
+        schema:
+          type: string
+          example: '50'
+        required: false
+      - in: query
+        name: offset
+        description: número no qual os resultados devem se iniciar
+        schema:
+          type: string
+          example: '30'
+        required: false
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: "Batata frita"
+                  skuId:
+                    type: string
+                    example: "000001"
+                  description:
+                    type: string
+                    example: "Deliciosa batata frita"
+                  category:
+                    type: string
+                    example: "Acompanhamento"
+                  price:
+                    type: number
+                    format: double
+                    example: 16.00    
+
+  /orders/{id}/Status: 
+   put:
+      tags:
+        - production
+      summary: Atualizar status do pedido
+      description: Atualizar o status de um pedido através do seu id
+      operationId: updateOrder
+      parameters: 
+        - name: id
+          in: path
+          description: ID do pedido
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "CREATED|PAID|RECEIVED|IN_PROGRESS|READY|DONE"
+      responses:
+        '200':
+          description: 'OK'
