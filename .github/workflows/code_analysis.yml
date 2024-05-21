@@ -1,4 +1,4 @@
-name: pipeline payment-ms
+name: pipeline production-ms
 
 on:
   push:
