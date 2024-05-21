@@ -5,8 +5,8 @@ import (
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/api"
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/controllers"
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/core/usecases"
+	"github.com/IgorRamosBR/g73-techchallenge-production/internal/infra/drivers/http"
 	gateways "github.com/IgorRamosBR/g73-techchallenge-production/internal/infra/gateways/order"
-	"github.com/IgorRamosBR/g73-techchallenge-production/internal/infra/http"
 )
 
 func main() {

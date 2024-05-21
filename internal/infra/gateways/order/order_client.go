@@ -8,7 +8,7 @@ import (
 
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/core/models"
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/core/usecases/dto"
-	"github.com/IgorRamosBR/g73-techchallenge-production/internal/infra/http"
+	"github.com/IgorRamosBR/g73-techchallenge-production/internal/infra/drivers/http"
 )
 
 type OrderClient interface {
