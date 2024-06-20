@@ -9,7 +9,7 @@ spec:
     app: g73-production-api
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 8080
-      nodePort: 30002
+      port: 8082
+      targetPort: 8082
+      nodePort: 30005
   type: LoadBalancer
