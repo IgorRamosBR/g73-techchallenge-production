@@ -7,12 +7,13 @@ import (
 )
 
 type rabbitMQPublisher struct {
-	channel  *amqp.Channel
-	exchange string
+	connection *amqp.Connection
+	channel    *amqp.Channel
+	exchange   string
 }
 
-func NewRabbitMQPublisher(channel *amqp.Channel, exchange string) Publisher {
-	return &rabbitMQPublisher{channel: channel, exchange: exchange}
+func NewRabbitMQPublisher(conn *amqp.Connection, channel *amqp.Channel, exchange string) Publisher {
+	return &rabbitMQPublisher{connection: conn, channel: channel, exchange: exchange}
 }
 
 func (c *rabbitMQPublisher) Publish(ctx context.Context, destination string, message []byte) error {

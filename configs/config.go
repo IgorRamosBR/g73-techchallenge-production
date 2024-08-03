@@ -2,27 +2,28 @@ package configs
 
 import (
 	"os"
-	"time"
 )
 
 type AppConfig struct {
 	Port string
 
-	OrderUrl     string
-	OrderTimeout time.Duration
+	OrderTable         string
+	OrderTableEndpoint string
+
+	OrderEventsBrokerUrl        string
+	OrderPaidEventsTopic        string
+	OrderReadyEventsDestination string
 }
 
 func GetAppConfig() AppConfig {
 	appConfig := AppConfig{}
 
 	appConfig.Port = os.Getenv("PORT")
-	appConfig.OrderUrl = os.Getenv("ORDER_URL")
-	orderTimeout := os.Getenv("ORDER_TIMEOUT")
-	orderTimeoutTime, err := time.ParseDuration(orderTimeout)
-	if err != nil {
-		panic(err)
-	}
+	appConfig.OrderTable = os.Getenv("ORDER_TABLE")
+	appConfig.OrderTableEndpoint = os.Getenv("ORDER_TABLE_ENDPOINT")
+	appConfig.OrderEventsBrokerUrl = os.Getenv("ORDER_EVENTS_BROKER_URL")
+	appConfig.OrderPaidEventsTopic = os.Getenv("ORDER_PAID_EVENTS")
+	appConfig.OrderReadyEventsDestination = os.Getenv("ORDER_READY_EVENTS_DESTINATION")
 
-	appConfig.OrderTimeout = orderTimeoutTime
 	return appConfig
 }
