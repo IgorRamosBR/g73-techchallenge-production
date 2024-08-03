@@ -7,7 +7,7 @@ import (
 
 type OrderUseCase interface {
 	GetOrders() (models.ProductionOrderPage, error)
-	UpdateOrderStatus(orderId string, status string) error
+	UpdateOrderStatus(orderId int, status string) error
 }
 
 type orderUseCase struct {
@@ -29,7 +29,7 @@ func (o orderUseCase) GetOrders() (models.ProductionOrderPage, error) {
 	return orders, nil
 }
 
-func (o orderUseCase) UpdateOrderStatus(orderId string, status string) error {
+func (o orderUseCase) UpdateOrderStatus(orderId int, status string) error {
 	err := o.orderClient.UpdateOrderStatus(orderId, status)
 	if err != nil {
 		return err
