@@ -3,6 +3,7 @@ package usecases
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/IgorRamosBR/g73-techchallenge-order/pkg/events"
@@ -16,20 +17,17 @@ type OrderConsumerUseCase interface {
 
 type orderConsumerUseCase struct {
 	orderPaidConsumer broker.Consumer
-	orderPublisher    broker.Publisher
 	orderUsecase      OrderUseCase
 }
 
 type OrderConsumerUseCaseConfig struct {
 	OrderPaidConsumer broker.Consumer
-	OrderPublisher    broker.Publisher
 	OrderUseCase      OrderUseCase
 }
 
-func NewOrderConsumerUseCase(orderPaidConsumer broker.Consumer, orderPublisher broker.Publisher, orderUsecase OrderUseCase) OrderConsumerUseCase {
+func NewOrderConsumerUseCase(orderPaidConsumer broker.Consumer, orderUsecase OrderUseCase) OrderConsumerUseCase {
 	return &orderConsumerUseCase{
 		orderPaidConsumer: orderPaidConsumer,
-		orderPublisher:    orderPublisher,
 		orderUsecase:      orderUsecase,
 	}
 }
@@ -69,7 +67,7 @@ func mapEventOrderToOrder(productionOrder events.OrderProductionDTO) models.Orde
 	}
 
 	order := models.Order{
-		ID:        productionOrder.ID,
+		ID:        strconv.Itoa(productionOrder.ID),
 		Status:    "CREATED",
 		CreatedAt: time.Now(),
 		Items:     orderItems,

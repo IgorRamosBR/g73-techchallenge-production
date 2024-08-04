@@ -2,6 +2,7 @@ package gateways
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/IgorRamosBR/g73-techchallenge-payment/pkg/dynamodb"
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/core/models"
@@ -21,29 +22,27 @@ type orderRepository struct {
 	dynamodbClient dynamodb.DynamoDBClient
 }
 
-func NewOrderRepository(dynamodbClient dynamodb.DynamoDBClient) OrderRepository {
+func NewOrderRepository(dynamodbClient dynamodb.DynamoDBClient, table string) OrderRepository {
 	return &orderRepository{
 		dynamodbClient: dynamodbClient,
+		table:          table,
 	}
 }
 
 func (r *orderRepository) GetOrders() ([]models.Order, error) {
-	type Key struct {
-		entity string `dynamodbav:"entity"`
-	}
-	key := Key{entity: "ORDER"}
-	keyMap, err := attributevalue.MarshalMap(key)
+	entityExpr := expression.Key("GSI1PK").Equal(expression.Value("ORDER"))
+	expr, err := expression.NewBuilder().WithKeyCondition(entityExpr).Build()
 	if err != nil {
-		return nil, fmt.Errorf("failed to map key: %w", err)
+		return nil, fmt.Errorf("failed to create query expr: %w", err)
 	}
 
-	items, err := r.dynamodbClient.GetItem(r.table, keyMap)
+	items, err := r.dynamodbClient.QueryItem(r.table, expr, "SecondaryIndex")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get orders: %w", err)
 	}
 
 	orders := []models.Order{}
-	err = attributevalue.UnmarshalMap(items, &orders)
+	err = attributevalue.UnmarshalListOfMaps(items, &orders)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal orders: %w", err)
 	}
@@ -66,12 +65,12 @@ func (r *orderRepository) SaveOrder(order models.Order) error {
 }
 
 func (r *orderRepository) UpdateOrderStatus(orderId int, status string) error {
-	id, err := attributevalue.Marshal(orderId)
+	id, err := attributevalue.Marshal(strconv.Itoa(orderId))
 	if err != nil {
 		return fmt.Errorf("failed to marshal order id: %w", err)
 	}
 
-	key := map[string]types.AttributeValue{"OrderID": id}
+	key := map[string]types.AttributeValue{"PK": id}
 
 	update := expression.Set(expression.Name("Status"), expression.Value(status))
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()

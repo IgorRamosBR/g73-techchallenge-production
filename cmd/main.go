@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 
+	"github.com/IgorRamosBR/g73-techchallenge-order/pkg/events/broker"
 	"github.com/IgorRamosBR/g73-techchallenge-payment/pkg/dynamodb"
 	"github.com/IgorRamosBR/g73-techchallenge-production/configs"
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/api"
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/controllers"
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/core/usecases"
-	"github.com/IgorRamosBR/g73-techchallenge-production/internal/infra/drivers/broker"
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/infra/gateways"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -24,15 +24,26 @@ func main() {
 		panic(err)
 	}
 
-	publisher, err := NewRabbitMQPublisher(appConfig.OrderEventsBrokerUrl, appConfig.OrderReadyEventsDestination)
+	brokerChannel, err := NewRabbitMQBrokerChannel(appConfig.OrderEventsBrokerUrl)
 	if err != nil {
 		panic(err)
 	}
+	defer brokerChannel.Close()
+
+	ordersPaidQueue, err := broker.NewRabbitMQConsumer(brokerChannel, appConfig.OrderInProgressEventsQueue)
+	if err != nil {
+		panic(err)
+	}
+
+	publisher := broker.NewRabbitMQPublisher(brokerChannel, appConfig.OrderEventsTopic)
 	defer publisher.Close()
 
-	orderRepository := gateways.NewOrderRepository(dynamodbClient)
-	orderNotify := gateways.NewOrderNotify(publisher, appConfig.OrderPaidEventsTopic)
+	orderRepository := gateways.NewOrderRepository(dynamodbClient, appConfig.OrderTable)
+	orderNotify := gateways.NewOrderNotify(publisher, appConfig.OrderReadyEventsDestination)
 	orderUseCase := usecases.NewOrderUseCase(orderRepository, orderNotify)
+	orderConsumerUseCase := usecases.NewOrderConsumerUseCase(ordersPaidQueue, orderUseCase)
+	orderConsumerUseCase.StartConsumers()
+
 	orderController := controllers.NewOrderController(orderUseCase)
 
 	api := api.NewApi(orderController)
@@ -57,7 +68,7 @@ func NewDynamoDBClient(endpoint string) (dynamodb.DynamoDBClient, error) {
 
 }
 
-func NewRabbitMQPublisher(url, exchange string) (broker.Publisher, error) {
+func NewRabbitMQBrokerChannel(url string) (*amqp.Channel, error) {
 	conn, err := amqp.Dial(url)
 	if err != nil {
 		return nil, err
@@ -68,7 +79,5 @@ func NewRabbitMQPublisher(url, exchange string) (broker.Publisher, error) {
 		return nil, err
 	}
 
-	publisher := broker.NewRabbitMQPublisher(conn, ch, exchange)
-
-	return publisher, nil
+	return ch, err
 }

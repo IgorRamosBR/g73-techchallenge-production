@@ -38,6 +38,11 @@ func (o *orderUseCase) UpdateOrderStatus(orderId int, orderStatus string) error 
 		return err
 	}
 
+	err = o.orderNotify.NotifyOrder(orderId, orderStatus)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

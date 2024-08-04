@@ -3,13 +3,13 @@ package models
 import "time"
 
 type Order struct {
-	ID          int         `json:"id" dynamodbav:"PK"`
+	ID          string      `json:"id" dynamodbav:"PK"`
 	Status      string      `json:"status" dynamodbav:"Status"`
 	CustomerCPF string      `json:"customerCPF" dynamodbav:"CustomerCPF"`
 	CreatedAt   time.Time   `json:"createdAt" dynamodbav:"CreatedAt"`
 	FinishedAt  time.Time   `json:"updatedAt" dynamodbav:"FinishedAt"`
 	Items       []OrderItem `json:"items" dynamodbav:"Items"`
-	Entity      string      `json:"entity" dynamodbav:"GSK"`
+	Entity      string      `json:"entity" dynamodbav:"GSI1PK"`
 }
 
 type OrderItem struct {

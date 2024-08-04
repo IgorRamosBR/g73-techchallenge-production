@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/IgorRamosBR/g73-techchallenge-order/pkg/events"
 	"github.com/IgorRamosBR/g73-techchallenge-production/internal/infra/drivers/broker"
 )
 
@@ -17,17 +18,12 @@ type orderNotify struct {
 	destination string
 }
 
-type OrderPaymentMessage struct {
-	OrderId int    `json:"orderId"`
-	Status  string `json:"status"`
-}
-
 func NewOrderNotify(publisher broker.Publisher, destination string) OrderNotify {
 	return orderNotify{publisher: publisher, destination: destination}
 }
 
 func (o orderNotify) NotifyOrder(orderId int, status string) error {
-	message, err := json.Marshal(OrderPaymentMessage{
+	message, err := json.Marshal(events.OrderStatusEventDTO{
 		OrderId: orderId,
 		Status:  status,
 	})
